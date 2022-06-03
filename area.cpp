@@ -56,11 +56,11 @@ void Area::paintEvent(QPaintEvent *) {
     painter.setPen(Qt::red);
 
     Coords** shapeCoords = new Coords*[5];
-    shapeCoords[0] = new Coords(1, -2, 2);
-    shapeCoords[1] = new Coords(-1, -3, 2);
-    shapeCoords[2] = new Coords(-1, 3, 2);
-    shapeCoords[3] = new Coords(1, 2, 2);
-    shapeCoords[4] = new Coords(0, 0, 7);
+    shapeCoords[0] = new Coords(1, -2, -2);
+    shapeCoords[1] = new Coords(-1, -3, -2);
+    shapeCoords[2] = new Coords(-1, 3, -2);
+    shapeCoords[3] = new Coords(1, 2, -2);
+    shapeCoords[4] = new Coords(0, 0, 3);
 
     Connection** shapeConnections = new Connection*[8];
     shapeConnections[0] = new Connection(0, 1);
@@ -104,16 +104,16 @@ void Area::paintEvent(QPaintEvent *) {
         centerX += shape->getCoords(i)->getX();
         centerY += shape->getCoords(i)->getY();
         centerZ += shape->getCoords(i)->getZ();
-        cout << shape->getCoords(i)->getZ() << ' ';
+//        cout << shape->getCoords(i)->getZ() << ' ';
     }
 
-    cout << endl;
+//    cout << endl;
 
     centerX /= 5;
     centerY /= 5;
     centerZ /= 5;
 
-    cout << "center: " << centerX << ' ' << centerY << ' ' << centerZ << endl;
+//    cout << "center: " << centerX << ' ' << centerY << ' ' << centerZ << endl;
 
     int sizeGV = 0;
     float **granVid = new float *[5];
@@ -139,8 +139,33 @@ void Area::paintEvent(QPaintEvent *) {
     float _viewY = viewY;
     float _viewZ = viewZ;
 
-    Coords* view = new Coords(_viewX, _viewY, _viewZ);
+//    Coords* view = new Coords(_viewX, _viewY, _viewZ);
+ Coords* view = new Coords(_viewX, _viewY, _viewZ);
 
+    float cos1 = cos(M_PI * alpha/ 180);
+    float sin1 = sin(M_PI * alpha / 180);
+
+    rotateShapeZ(transformMatrix, cos1, sin1);
+    float** superCoords = new float*[4];
+    for(int i = 0; i < 4 ; i++) {
+        superCoords[i] = new float[1];
+    }
+
+    superCoords[0][0] = viewX;
+    superCoords[0][1] = viewY;
+    superCoords[0][2] = viewZ;
+    superCoords[0][3] = 1;
+
+
+    matrixMultiplication(superCoords, 1, 4, transformMatrix, 4);
+
+    view->setX(superCoords[0][0]);
+    view->setY(superCoords[0][1]);
+    view->setZ(superCoords[0][2]);
+
+//    viewX = view->getX();
+//    viewY = view->getY();
+//    viewZ = view->getZ();
     for (int i = 0; i < 5; i++) {
         float A = W[0][i];
         float B = W[1][i];
@@ -148,7 +173,7 @@ void Area::paintEvent(QPaintEvent *) {
         float D = W[3][i];
         float value = A*view->getX() + B*view->getY() + C*view->getZ() + D;
 //        float value = A*view->getX() + B*view->getY() + C*view->getZ();
-        cout << A << ' ' << B << ' ' << C << ' ' << D << endl << value << endl;
+//        cout << A << ' ' << B << ' ' << C << ' ' << D << endl << value << endl;
         if (value < 0) {
             for (int j = 0; j < 6; j++) {
                 granVid[sizeGV][j] = gran[i][j];
@@ -248,7 +273,7 @@ void Area::paintEvent(QPaintEvent *) {
 
 void Area::timerEvent(QTimerEvent *) {
     alpha += 1;
-    if (alpha > 90)
+    if (alpha > 180)
         killTimer(myTimer);
     else
         update();
@@ -258,7 +283,7 @@ void Area::hideEvent(QHideEvent *) {
 }
 
 void Area::start_prog() {
-    myTimer = startTimer(20);
+    myTimer = startTimer(90);
 }
 
 void Area::setNewCoords(Shape *shape, float** changeMatrix) {
@@ -424,7 +449,7 @@ float Area::getA(Coords *first, Coords *second, Coords *third) {
     float z2 = second->getZ();
     float z3 = third->getZ();
 
-    cout << '(' << y3<<'-'<<y1 << ")*(" << z2<<'-'<<z1<<")-("<<y2<<'-'<<y1<<")*("<<z3<<'-'<<z1<<')'<<endl;
+//    cout << '(' << y3<<'-'<<y1 << ")*(" << z2<<'-'<<z1<<")-("<<y2<<'-'<<y1<<")*("<<z3<<'-'<<z1<<')'<<endl;
 
     return (y3-y1)*(z2-z1)-(y2-y1)*(z3-z1);
 }
@@ -438,7 +463,7 @@ float Area::getB(Coords *first, Coords *second, Coords *third) {
     float z2 = second->getZ();
     float z3 = third->getZ();
 
-    return (x3-x1)*(z2-z1)-(x2-x1)*(z3-z1);
+    return (x2-x1)*(z3-z1)-(x3-x1)*(z2-z1);
 }
 
 float Area::getC(Coords *first, Coords *second, Coords *third) {
@@ -451,7 +476,7 @@ float Area::getC(Coords *first, Coords *second, Coords *third) {
     float x2 = second->getX();
     float x3 = third->getX();
 
-    return (y3-y1)*(x2-x1)-(y2-y1)*(x3-x1);
+    return (x3-x1)*(y2-y1)-(x2-x1)*(y3-y1);
 }
 
 float Area::getD(float A, float B, float C, Coords *first) {
