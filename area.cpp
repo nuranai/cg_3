@@ -9,8 +9,8 @@ using namespace std;
 Area::Area(QWidget *parent):QWidget(parent)
 {
 
-    gran = new int*[5];
-    for (int i = 0; i < 5; i++) {
+    gran = new int*[6];
+    for (int i = 0; i < 6; i++) {
         gran[i] = new int[6];
     }
     gran[0][0] = 0;
@@ -21,28 +21,34 @@ Area::Area(QWidget *parent):QWidget(parent)
     gran[0][5] = -1;
     gran[1][0] = 0;
     gran[1][1] = 1;
-    gran[1][2] = 4;
-    gran[1][3] = 0;
-    gran[1][4] = -1;
+    gran[1][2] = 5;
+    gran[1][3] = 4;
+    gran[1][4] = 0;
     gran[1][5] = -1;
     gran[2][0] = 1;
     gran[2][1] = 2;
-    gran[2][2] = 4;
-    gran[2][3] = 1;
-    gran[2][4] = -1;
+    gran[2][2] = 6;
+    gran[2][3] = 5;
+    gran[2][4] = 1;
     gran[2][5] = -1;
     gran[3][0] = 2;
     gran[3][1] = 3;
-    gran[3][2] = 4;
-    gran[3][3] = 2;
-    gran[3][4] = -1;
+    gran[3][2] = 7;
+    gran[3][3] = 6;
+    gran[3][4] = 2;
     gran[3][5] = -1;
-    gran[4][0] = 0;
-    gran[4][1] = 3;
+    gran[4][0] = 3;
+    gran[4][1] = 0;
     gran[4][2] = 4;
-    gran[4][3] = 0;
-    gran[4][4] = -1;
+    gran[4][3] = 7;
+    gran[4][4] = 3;
     gran[4][5] = -1;
+    gran[5][0] = 4;
+    gran[5][1] = 5;
+    gran[5][2] = 6;
+    gran[5][3] = 7;
+    gran[5][4] = 4;
+    gran[5][5] = -1;
 
     setFixedSize(QSize(500, 500));
 }
@@ -55,31 +61,37 @@ void Area::paintEvent(QPaintEvent *) {
     QPainter painter(this);
     painter.setPen(Qt::red);
 
-    Coords** shapeCoords = new Coords*[5];
-    shapeCoords[0] = new Coords(1, -2, -2);
-    shapeCoords[1] = new Coords(-1, -3, -2);
-    shapeCoords[2] = new Coords(-1, 3, -2);
-    shapeCoords[3] = new Coords(1, 2, -2);
-    shapeCoords[4] = new Coords(0, 0, 3);
+Coords** shapeCoords = new Coords*[8];
+    shapeCoords[0] = new Coords(0, 0, 0);
+    shapeCoords[1] = new Coords(2, 0, 0);
+    shapeCoords[2] = new Coords(2, 2, 0);
+    shapeCoords[3] = new Coords(0, 2, 0);
+    shapeCoords[4] = new Coords(0, 0, 2);
+    shapeCoords[5] = new Coords(2, 0, 2);
+    shapeCoords[6] = new Coords(2, 2, 2);
+    shapeCoords[7] = new Coords(0, 2, 2);
 
-    Connection** shapeConnections = new Connection*[8];
+    Connection** shapeConnections = new Connection*[12];
     shapeConnections[0] = new Connection(0, 1);
-    shapeConnections[1] = new Connection(0, 3);
-    shapeConnections[2] = new Connection(0, 4);
-    shapeConnections[3] = new Connection(1, 2);
-    shapeConnections[4] = new Connection(1, 4);
-    shapeConnections[5] = new Connection(2, 3);
-    shapeConnections[6] = new Connection(2, 4);
-    shapeConnections[7] = new Connection(3, 4);
+    shapeConnections[1] = new Connection(1, 2);
+    shapeConnections[2] = new Connection(2, 3);
+    shapeConnections[3] = new Connection(3, 0);
+    shapeConnections[4] = new Connection(0, 4);
+    shapeConnections[5] = new Connection(1, 5);
+    shapeConnections[6] = new Connection(2, 6);
+    shapeConnections[7] = new Connection(3, 7);
+    shapeConnections[8] = new Connection(4, 5);
+    shapeConnections[9] = new Connection(5, 6);
+    shapeConnections[10] = new Connection(6, 7);
+    shapeConnections[11] = new Connection(7, 4);
 
-    Shape* shape = new Shape(5, shapeCoords, 8, shapeConnections);
-
+    Shape* shape = new Shape(8, shapeCoords, 12, shapeConnections);
     float** transformMatrix = new float*[4];
     float** W = new float*[4];
 
     for (int i = 0; i < 4; i++) {
         transformMatrix[i] = new float[4];
-        W[i] = new float[5];
+        W[i] = new float[6];
         for (int j = 0; j < 4; j++) {
             if (i == j) {
                 transformMatrix[i][j] = 1;
@@ -89,7 +101,7 @@ void Area::paintEvent(QPaintEvent *) {
         }
     }
 
-    for (int j = 0; j < 5; j++) {
+    for (int j = 0; j < 6; j++) {
         W[0][j] = getA(shape->getCoords(gran[j][1]), shape->getCoords(gran[j][0]), shape->getCoords(gran[j][2]));
         W[1][j] = getB(shape->getCoords(gran[j][1]), shape->getCoords(gran[j][0]), shape->getCoords(gran[j][2]));
         W[2][j] = getC(shape->getCoords(gran[j][1]), shape->getCoords(gran[j][0]), shape->getCoords(gran[j][2]));
@@ -100,28 +112,23 @@ void Area::paintEvent(QPaintEvent *) {
     float centerY = 0;
     float centerZ = 0;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 8; i++) {
         centerX += shape->getCoords(i)->getX();
         centerY += shape->getCoords(i)->getY();
         centerZ += shape->getCoords(i)->getZ();
-//        cout << shape->getCoords(i)->getZ() << ' ';
     }
 
-//    cout << endl;
-
-    centerX /= 5;
-    centerY /= 5;
-    centerZ /= 5;
-
-//    cout << "center: " << centerX << ' ' << centerY << ' ' << centerZ << endl;
+    centerX /= 8;
+    centerY /= 8;
+    centerZ /= 8;
 
     int sizeGV = 0;
-    float **granVid = new float *[5];
-    for(int i = 0; i < 5; i++) {
+    float **granVid = new float *[6];
+    for(int i = 0; i < 6; i++) {
         granVid[i] = new float[6];
     }
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         float A = W[0][i];
         float B = W[1][i];
         float C = W[2][i];
@@ -139,8 +146,7 @@ void Area::paintEvent(QPaintEvent *) {
     float _viewY = viewY;
     float _viewZ = viewZ;
 
-//    Coords* view = new Coords(_viewX, _viewY, _viewZ);
- Coords* view = new Coords(_viewX, _viewY, _viewZ);
+    Coords* view = new Coords(_viewX, _viewY, _viewZ);
 
     float cos1 = cos(M_PI * alpha/ 180);
     float sin1 = sin(M_PI * alpha / 180);
@@ -163,28 +169,19 @@ void Area::paintEvent(QPaintEvent *) {
     view->setY(superCoords[0][1]);
     view->setZ(superCoords[0][2]);
 
-//    viewX = view->getX();
-//    viewY = view->getY();
-//    viewZ = view->getZ();
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         float A = W[0][i];
         float B = W[1][i];
         float C = W[2][i];
         float D = W[3][i];
         float value = A*view->getX() + B*view->getY() + C*view->getZ() + D;
-//        float value = A*view->getX() + B*view->getY() + C*view->getZ();
-//        cout << A << ' ' << B << ' ' << C << ' ' << D << endl << value << endl;
         if (value < 0) {
             for (int j = 0; j < 6; j++) {
                 granVid[sizeGV][j] = gran[i][j];
-//                cout << gran[i][j] << ' ';
             }
-//            cout << endl;
             sizeGV++;
-//            cout << "added to granVid" << endl;
         }
     }
-//    cout <<sizeGV << endl;
 
     Coords* translateCoords = new Coords(-view->getX(), -view->getY(), -view->getZ());
 
@@ -198,7 +195,6 @@ void Area::paintEvent(QPaintEvent *) {
         }
     }
 
-//    cout << translateCoords->getX() << ' ' << translateCoords->getY() << ' ' << translateCoords->getZ() << endl;
     translateShape(transformMatrix, translateCoords);
 
     scaleShape(transformMatrix, -1, 1, 1);
@@ -231,7 +227,7 @@ void Area::paintEvent(QPaintEvent *) {
 
     float r = sqrt(view->getX() * view->getX() + view->getY() * view->getY() + view->getZ() * view->getZ());
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 8; i++) {
         Coords* first = shape->getCoords(i);
 
         float P = 5;
@@ -257,12 +253,11 @@ void Area::paintEvent(QPaintEvent *) {
             Coords* first = shape->getCoords(granVid[i][j]);
             Coords* second = shape->getCoords(granVid[i][j+1]);
             painter.drawLine(first->getX(), first->getY(), second->getX(), second->getY());
-//            cout << first->getX() << ' ' << first->getY() << ' ' << second->getX() << ' ' << second->getY() << endl;
         }
     }
     delete shape;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 6; i++) {
         if (i < 4)
             delete [] W[i];
         delete [] granVid[i];

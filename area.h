@@ -12,9 +12,9 @@ private:
 //    Shape* shapeOrigin;
     int myTimer;
     int** gran;
-    float viewX = 5;
-    float viewY = 0;
-    float viewZ = 0;
+    float viewX = 6;
+    float viewY = 6;
+    float viewZ = 5;
     float alpha = 0;
     void setNewCoords(Shape* shape, float**);
     void translateShape(float** oldMatrix, Coords* value);
